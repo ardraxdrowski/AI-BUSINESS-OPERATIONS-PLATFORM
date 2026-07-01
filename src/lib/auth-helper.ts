@@ -5,6 +5,7 @@ export interface AuthSession {
   tenantId: string;
   role: string;
   email: string;
+  name: string;
 }
 
 /**
@@ -16,6 +17,7 @@ export async function getAuthSession(): Promise<AuthSession | null> {
   const tenantId = headersList.get("x-tenant-id");
   const role = headersList.get("x-user-role");
   const email = headersList.get("x-user-email");
+  const name = headersList.get("x-user-name");
 
   if (!userId || !tenantId) {
     return null;
@@ -26,6 +28,7 @@ export async function getAuthSession(): Promise<AuthSession | null> {
     tenantId,
     role: role || "USER",
     email: email || "",
+    name: name || "User",
   };
 }
 

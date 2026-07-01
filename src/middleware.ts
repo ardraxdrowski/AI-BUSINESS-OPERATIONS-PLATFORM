@@ -34,6 +34,7 @@ export async function middleware(request: NextRequest) {
   requestHeaders.delete("x-tenant-id");
   requestHeaders.delete("x-user-role");
   requestHeaders.delete("x-user-email");
+  requestHeaders.delete("x-user-name");
 
   if (isPublic) {
     return NextResponse.next({
@@ -59,6 +60,7 @@ export async function middleware(request: NextRequest) {
       requestHeaders.set("x-tenant-id", payload.tenantId as string);
       requestHeaders.set("x-user-role", payload.role as string);
       requestHeaders.set("x-user-email", payload.email as string);
+      requestHeaders.set("x-user-name", payload.name as string);
 
       // If the user is authenticated and goes to dashboard/chat, check onboarding
       // (For this simplified demo, we handle onboarding redirections in pages or just allow access)
