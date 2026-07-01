@@ -1,0 +1,162 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id                 String           @id @default(uuid())
+  name               String
+  companyDescription String?
+  industry           String?
+  timezone           String?          @default("UTC")
+  onboardingStatus   String           @default("PENDING") // PENDING, COMPLETED
+  createdAt          DateTime         @default(now())
+  users              User[]
+  contacts           Contact[]
+  opportunities      Opportunity[]
+  conversations      AIConversation[]
+  messages           Message[]
+  tasks              Task[]
+  auditLogs          AuditLog[]
+}
+
+model User {
+  id            String         @id @default(uuid())
+  tenantId      String
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  googleId      String?        // Nullable for Developer Bypass Auth
+  email         String         @unique
+  name          String
+  role          String         @default("USER") // ADMIN, USER
+  createdAt     DateTime       @default(now())
+  refreshTokens RefreshToken[]
+  conversations AIConversation[]
+
+  @@index([tenantId])
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  rotatedFrom String?  // Tracks the ID of the token rotated from
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Contact {
+  id            String        @id @default(uuid())
+  tenantId      String
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name          String
+  phone         String?
+  email         String?
+  source        String        @default("DIRECT") // DIRECT, WHATSAPP, EMAIL, WEB_LEAD
+  createdAt     DateTime      @default(now())
+  opportunities Opportunity[]
+  messages      Message[]
+  tasks         Task[]
+
+  @@index([tenantId])
+  @@index([email])
+}
+
+model Opportunity {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  title     String
+  value     Float
+  stage     String   // LEAD, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST
+  score     Int?     // Lead qualification score (0-100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([contactId])
+}
+
+model AIConversation {
+  id        String      @id @default(uuid())
+  tenantId  String
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String      @default("New Chat")
+  createdAt DateTime    @default(now())
+  messages  AIMessage[]
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model AIMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String         // user, model
+  content        String
+  toolCalls      Json?          // JSON field representing Gemini tool calls
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId])
+}
+
+model Message {
+  id                String   @id @default(uuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contactId         String
+  contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  channel           String   // whatsapp, email, call
+  direction         String   // inbound, outbound
+  content           String
+  aiSummary         String?
+  intent            String?
+  sentiment         String?
+  recommendedAction String?
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([contactId])
+}
+
+model Task {
+  id        String    @id @default(uuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contactId String?
+  contact   Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  title     String
+  dueAt     DateTime
+  status    String    @default("PENDING") // PENDING, COMPLETED, OVERDUE
+  createdAt DateTime  @default(now())
+
+  @@index([tenantId])
+  @@index([contactId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actorId    String?  // Nullable if system/AI-initiated
+  action     String   // e.g. "CREATE_CONTACT", "UPDATE_OPPORTUNITY", "QUALIFY_LEAD"
+  targetType String   // e.g. "CONTACT", "OPPORTUNITY", "TASK", "WORKFLOW"
+  targetId   String?
+  metadata   Json?    // JSON audit details
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([createdAt])
+}
