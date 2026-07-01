@@ -13,6 +13,7 @@ import {
   LogOut,
   Cpu,
   User as UserIcon,
+  Sparkles,
 } from "lucide-react";
 import LogoutButton from "./logout-button";
 
@@ -76,7 +77,8 @@ export default async function DashboardLayout({
         {/* Navigation Links */}
         <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           <SidebarLink href="/dashboard" label="Home" icon={<LayoutDashboard className="w-5 h-5" />} />
-          <SidebarLink href="/chat" label="Conversations" icon={<MessageSquare className="w-5 h-5" />} />
+          <SidebarLink href="/chat" label="AI Employee" icon={<Sparkles className="w-5 h-5" />} />
+          <SidebarLink href="/inbox" label="Conversations" icon={<MessageSquare className="w-5 h-5" />} />
           <SidebarLink href="/opportunities" label="Opportunities" icon={<Briefcase className="w-5 h-5" />} />
           <SidebarLink href="/contacts" label="Contacts" icon={<Users className="w-5 h-5" />} />
           <SidebarLink href="/tasks" label="Tasks" icon={<CheckSquare className="w-5 h-5" />} />
