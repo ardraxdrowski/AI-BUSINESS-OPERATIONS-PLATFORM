@@ -88,8 +88,10 @@ export async function rotateRefreshToken(oldTokenStr: string): Promise<{
     return null; // Token doesn't exist
   }
 
-  // Reuse Detection: if token is already revoked or rotated, revoke ALL tokens for this user
-  if (tokenRecord.revoked || tokenRecord.rotatedFrom) {
+  // Reuse detection: a refresh token is consumed by marking it revoked.
+  // `rotatedFrom` is lineage metadata on the newly-issued token, not a signal
+  // that the current token has already been used.
+  if (tokenRecord.revoked) {
     await prisma.refreshToken.updateMany({
       where: { userId: tokenRecord.userId },
       data: { revoked: true },
@@ -114,12 +116,12 @@ export async function rotateRefreshToken(oldTokenStr: string): Promise<{
 
   // Rotate in transaction
   await prisma.$transaction([
-    // Mark old token as rotated (we store the ID of the new token in rotatedFrom, or just mark revoked)
+    // Consume the current token so any later reuse is treated as a replay.
     prisma.refreshToken.update({
       where: { id: tokenRecord.id },
       data: { revoked: true },
     }),
-    // Create new token
+    // Create the replacement token and keep lineage for audit/debugging.
     prisma.refreshToken.create({
       data: {
         userId: user.id,
