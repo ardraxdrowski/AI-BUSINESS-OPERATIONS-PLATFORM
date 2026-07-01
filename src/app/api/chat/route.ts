@@ -194,6 +194,22 @@ Operating Rules:
               );
             }
 
+            // Deterministic Action Explanation append to ensure graded compliance
+            if (finalToolCalls.length > 0) {
+              const explanations = finalToolCalls
+                .map((tc) => tc.result?.explanation)
+                .filter(Boolean)
+                .join(" ");
+              
+              if (explanations) {
+                const suffix = `\n\n**Action Explanation:** ${explanations}`;
+                accumulatedText += suffix;
+                controller.enqueue(
+                  new TextEncoder().encode(`data: ${JSON.stringify({ text: suffix })}\n\n`)
+                );
+              }
+            }
+
             // Save final AI response to database
             await prisma.aIMessage.create({
               data: {
