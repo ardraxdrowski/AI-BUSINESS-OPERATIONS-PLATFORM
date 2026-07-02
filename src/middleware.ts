@@ -22,6 +22,34 @@ const PUBLIC_PATHS = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const origin = request.headers.get("origin") || "";
+  const isApi = pathname.startsWith("/api/");
+  
+  // Validate request origin against local development or production APP_URL (no wildcard)
+  const isAllowedOrigin = origin ? (
+    origin.startsWith("http://localhost:") || 
+    (process.env.APP_URL && origin === process.env.APP_URL)
+  ) : false;
+
+  // Centralized helper to set CORS headers on API responses
+  const withCors = (res: NextResponse) => {
+    if (isApi && isAllowedOrigin && origin) {
+      res.headers.set("Access-Control-Allow-Origin", origin);
+      res.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-tenant-id");
+      res.headers.set("Access-Control-Allow-Credentials", "true");
+    }
+    return res;
+  };
+
+  // Handle preflight OPTIONS requests immediately
+  if (request.method === "OPTIONS" && isApi) {
+    const response = new NextResponse(null, { status: 204 });
+    if (isAllowedOrigin && origin) {
+      response.headers.set("Access-Control-Max-Age", "86400"); // cache preflight for 24h
+    }
+    return withCors(response);
+  }
 
   // Check if current path is public
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
@@ -41,15 +69,15 @@ export async function middleware(request: NextRequest) {
   requestHeaders.delete("x-user-name");
 
   if (isPublic) {
-    return NextResponse.next({
+    return withCors(NextResponse.next({
       headers: requestHeaders,
-    });
+    }));
   }
 
   // If no tokens at all, redirect to login (or return 401 for API)
   if (!accessToken && !refreshToken) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (isApi) {
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -65,26 +93,21 @@ export async function middleware(request: NextRequest) {
       requestHeaders.set("x-user-role", payload.role as string);
       requestHeaders.set("x-user-email", payload.email as string);
       requestHeaders.set("x-user-name", payload.name as string);
-
-      // If the user is authenticated and goes to dashboard/chat, check onboarding
-      // (For this simplified demo, we handle onboarding redirections in pages or just allow access)
       
-      return NextResponse.next({
+      return withCors(NextResponse.next({
         request: {
           headers: requestHeaders,
         },
-      });
+      }));
     } catch (err) {
       // Access token is invalid/expired. Proceed to refresh flow.
     }
   }
 
   // Case 2: Access token expired/missing, but refresh token exists
-  // Redirect to refresh route to attempt silent token rotation
   if (refreshToken) {
-    if (pathname.startsWith("/api/")) {
-      // For API routes, return 401 and let client call refresh explicitly
-      return NextResponse.json({ error: "Access token expired" }, { status: 401 });
+    if (isApi) {
+      return withCors(NextResponse.json({ error: "Access token expired" }, { status: 401 }));
     }
 
     // For page requests, redirect to refresh endpoint with target redirect URL
@@ -94,8 +117,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Fallback redirect
-  if (pathname.startsWith("/api/")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (isApi) {
+    return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
   return NextResponse.redirect(new URL("/login", request.url));
 }
