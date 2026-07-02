@@ -261,7 +261,7 @@ export default function ChatPage() {
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-bold text-zinc-100">DareX AI Employee</span>
-                <span className="text-[10px] px-1.5 py-0.2 bg-zinc-900 border border-zinc-800 text-zinc-400 rounded-md font-semibold">gemini-1.5</span>
+                <span className="text-[10px] px-1.5 py-0.2 bg-zinc-900 border border-zinc-800 text-zinc-400 rounded-md font-semibold">gemini-2.5-flash</span>
               </div>
               <p className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">Online • Ready to execute</p>
             </div>
