@@ -82,6 +82,13 @@ export async function POST(request: Request) {
       where: { tenantId: session.tenantId, status: "PENDING" },
     });
 
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
     const systemInstruction = `
 You are DareXAI's Conversational AI Business Employee for the tenant "${tenant?.name || "DareXAI Demo"}".
 Business Context:
@@ -89,6 +96,7 @@ Business Context:
 - Description: ${tenant?.companyDescription || "Operations consulting"}
 - Active Pipeline: $${pipelineValue.toLocaleString()} across ${activeDeals.length} active deal(s)
 - Pending Tasks Count: ${pendingTasks}
+- Current Date: ${currentDate}
 
 Operating Rules:
 1. You have direct access to tools for managing contacts, opportunities, tasks, sending WhatsApp messages, and pulling metrics. Proactively call them to resolve the user's intent.
