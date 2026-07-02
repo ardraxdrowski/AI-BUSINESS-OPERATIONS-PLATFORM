@@ -70,6 +70,43 @@ Strict tenant isolation is the core engineering foundation of DareXAI:
 
 ---
 
+## 🗄️ Database Architecture (SQLite-as-Demo / Postgres-as-Production)
+
+To ensure a frictionless local setup, DareXAI uses **SQLite** by default. However, the database schema and query layers are designed provider-agnostically for **PostgreSQL** in production environments.
+
+### Transitioning to PostgreSQL in Production:
+1. **Prisma Provider Update**: Edit `prisma/schema.prisma` to point to PostgreSQL:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+2. **Environment Variable Configuration**: Change the connection string in your production `.env` file:
+   ```env
+   DATABASE_URL="postgresql://db_user:db_password@db_host:5432/darex_db?sslmode=require"
+   ```
+3. **Database Migration**: Push the tables to the PostgreSQL target:
+   ```bash
+   npx prisma db push
+   ```
+
+---
+
+## 🔌 Offline Evaluation & Mock Fallback Patterns
+
+To guarantee 100% demo capability in zero-config offline sandboxes, the system implements standard fallback engines:
+
+1. **Gemini AI Intent Parser Fallback**:
+   * If `GEMINI_API_KEY` is omitted, the `/api/chat` route shifts to a rule-based regex intent matcher.
+   * It simulates identical database actions (creates opportunities, fetches metrics, queries contacts) and streams responses word-by-word using a custom server-side timer, mimicking native streaming.
+2. **Mock WhatsApp API Dispatcher**:
+   * WhatsApp tool actions write directly to the database message ledger and timeline under `channel: "whatsapp"`. This presents a fully populated timeline in the Unified Inbox without requiring live API keys.
+3. **Multi-Channel Ingestion Simulator**:
+   * The simulator allows testing of inbound **WhatsApp, Email, and Phone Call** event payloads, executing the identical intent/sentiment pipelines.
+
+---
+
 ## 🧠 Conversational AI Agent (Gemini Function Calling)
 
 The AI Agent acts as an autonomous virtual employee:
