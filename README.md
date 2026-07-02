@@ -146,7 +146,7 @@ Located under **Contacts** (`/contacts`) &rarr; **Simulate Lead Automation**:
 2. **AI Lead Score**: Evaluates sales readiness on a scale of 0 to 100 based on budget and notes.
 3. **Auto Opportunity**: Instantly spins up a matching pipeline opportunity containing the AI score.
 4. **Threshold logic**:
-   * **Score > 80**: Triggers an outbound WhatsApp alert (*"🔥 High-quality lead ingested..."*) and schedules an immediate followup task for tomorrow.
+   * **Score > 80**: Triggers an outbound WhatsApp alert (*" High-quality lead ingested..."*) and schedules an immediate followup task for tomorrow.
    * **Score <= 80**: Schedules a standard nurturing task for 3 days later.
 5. **Immutable Ledger**: Records audit events for every step in the pipeline.
 
