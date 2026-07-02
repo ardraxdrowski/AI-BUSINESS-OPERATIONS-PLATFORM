@@ -7,8 +7,12 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 // List of public paths that do not require authentication
+ 
+
 const PUBLIC_PATHS = [
   "/login",
+  "/onboarding",
+  "/api/onboarding",
   "/api/auth/google/login",
   "/api/auth/google/callback",
   "/api/auth/bypass",

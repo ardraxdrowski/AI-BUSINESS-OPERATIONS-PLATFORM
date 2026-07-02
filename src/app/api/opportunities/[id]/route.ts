@@ -35,7 +35,23 @@ export async function GET(
       return NextResponse.json({ error: "Opportunity not found" }, { status: 404 });
     }
 
-    return NextResponse.json(opportunity);
+    // Fetch related audit logs for this opportunity's activity timeline
+    const auditLogs = await prisma.auditLog.findMany({
+      where: {
+        tenantId: session.tenantId,
+        targetType: "OPPORTUNITY",
+        targetId: opportunity.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
+    });
+
+    return NextResponse.json({
+      ...opportunity,
+      auditLogs,
+    });
   } catch (error: any) {
     if (error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

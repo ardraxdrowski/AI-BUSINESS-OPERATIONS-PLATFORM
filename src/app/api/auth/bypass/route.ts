@@ -18,17 +18,18 @@ export async function POST() {
   }
 
   try {
-    // 1. Find or create the default bypass Tenant
-    let tenant = await prisma.tenant.findFirst({
-      where: { name: "DareXAI Demo Corp" },
+    // 1. Find or create the default bypass Tenant (aligned with seed data)
+    let tenant = await prisma.tenant.findUnique({
+      where: { id: "demo-tenant-id" },
     });
 
     if (!tenant) {
       tenant = await prisma.tenant.create({
         data: {
-          name: "DareXAI Demo Corp",
-          companyDescription: "Leading AI operations consultancy",
-          industry: "Technology",
+          id: "demo-tenant-id",
+          name: "DareX Corp",
+          companyDescription: "DareX Corp builds agentic AI pipelines and custom operations software for high-growth B2B startups.",
+          industry: "Enterprise AI Consulting",
           onboardingStatus: "COMPLETED",
         },
       });
@@ -36,15 +37,16 @@ export async function POST() {
 
     // 2. Find or create the default bypass User linked to the Tenant
     let user = await prisma.user.findUnique({
-      where: { email: "demo.admin@darex.ai" },
+      where: { email: "sanu@example.com" },
     });
 
     if (!user) {
       user = await prisma.user.create({
         data: {
+          id: "demo-user-id",
           tenantId: tenant.id,
-          name: "Demo Admin",
-          email: "demo.admin@darex.ai",
+          name: "Sanu",
+          email: "sanu@example.com",
           role: "ADMIN",
         },
       });
