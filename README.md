@@ -4,7 +4,7 @@ DareXAI is a modern, dark-themed, multi-tenant B2B CRM and Operational AI Agent 
 
 ---
 
-## 🚀 Quick Start (Zero-Config Local Run)
+## Quick Start (Zero-Config Local Run)
 
 Get the application running locally in less than 2 minutes.
 
@@ -46,7 +46,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🔒 Security & Tenant Isolation Architecture
+## Security & Tenant Isolation Architecture
 
 Strict tenant isolation is the core engineering foundation of DareXAI:
 
@@ -70,7 +70,7 @@ Strict tenant isolation is the core engineering foundation of DareXAI:
 
 ---
 
-## 🗄️ Database Architecture (SQLite-as-Demo / Postgres-as-Production)
+##  Database Architecture (SQLite-as-Demo / Postgres-as-Production)
 
 To ensure a frictionless local setup, DareXAI uses **SQLite** by default. However, the database schema and query layers are designed provider-agnostically for **PostgreSQL** in production environments.
 
@@ -93,7 +93,7 @@ To ensure a frictionless local setup, DareXAI uses **SQLite** by default. Howeve
 
 ---
 
-## 🔌 Offline Evaluation & Mock Fallback Patterns
+##  Offline Evaluation & Mock Fallback Patterns
 
 To guarantee 100% demo capability in zero-config offline sandboxes, the system implements standard fallback engines:
 
@@ -107,7 +107,7 @@ To guarantee 100% demo capability in zero-config offline sandboxes, the system i
 
 ---
 
-## 🧠 Conversational AI Agent (Gemini Function Calling)
+## Conversational AI Agent (Gemini Function Calling)
 
 The AI Agent acts as an autonomous virtual employee:
 
@@ -124,7 +124,7 @@ The AI Agent acts as an autonomous virtual employee:
 
 ---
 
-## 📬 Unified Inbox & Ingest Simulator
+##  Unified Inbox & Ingest Simulator
 
 Located under **Conversations** (`/inbox`):
 
@@ -138,7 +138,7 @@ Located under **Conversations** (`/inbox`):
 
 ---
 
-## ⚡ Workflow Automation (Lead Qualification)
+## Workflow Automation (Lead Qualification)
 
 Located under **Contacts** (`/contacts`) &rarr; **Simulate Lead Automation**:
 
@@ -146,13 +146,13 @@ Located under **Contacts** (`/contacts`) &rarr; **Simulate Lead Automation**:
 2. **AI Lead Score**: Evaluates sales readiness on a scale of 0 to 100 based on budget and notes.
 3. **Auto Opportunity**: Instantly spins up a matching pipeline opportunity containing the AI score.
 4. **Threshold logic**:
-   * **Score > 80**: Triggers an outbound WhatsApp alert (*"🔥 High-quality lead ingested..."*) and schedules an immediate followup task for tomorrow.
+   * **Score > 80**: Triggers an outbound WhatsApp alert (*" High-quality lead ingested..."*) and schedules an immediate followup task for tomorrow.
    * **Score <= 80**: Schedules a standard nurturing task for 3 days later.
 5. **Immutable Ledger**: Records audit events for every step in the pipeline.
 
 ---
 
-## 🧪 Integration Test Coverage
+## Integration Test Coverage
 
 The test suite resides in the `__tests__/` directory and is powered by Vitest:
 
